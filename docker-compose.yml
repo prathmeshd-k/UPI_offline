@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production-grade instead of H2)
+  postgres:
+    image: postgres:15-alpine
+    container_name: upi-mesh-db
+    environment:
+      POSTGRES_DB: upimesh
+      POSTGRES_USER: upiuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SecurePassword123!}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U upiuser -d upimesh"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - upi-mesh-network
+
+  # UPI Mesh Backend
+  upi-mesh-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upi-mesh-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/upimesh
+      SPRING_DATASOURCE_USERNAME: upiuser
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-SecurePassword123!}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL95Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      
+      # Server configuration
+      SERVER_PORT: 8080
+      
+      # Application settings
+      UPI_MESH_IDEMPOTENCY_TTL_SECONDS: 86400
+      UPI_MESH_PACKET_MAX_AGE_SECONDS: 86400
+      
+      # Logging
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_COM_DEMO_UPIMESH: DEBUG
+    ports:
+      - "8080:8080"
+    networks:
+      - upi-mesh-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/accounts"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: pgAdmin for database administration
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: upi-mesh-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - upi-mesh-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  upi-mesh-network:
+    driver: bridge

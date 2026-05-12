@@ -44,7 +44,7 @@ public class BridgeIngestionService {
             if (!idempotency.claim(packetHash)) {
                 log.info("DUPLICATE packet {} from bridge {} — dropped",
                         packetHash.substring(0, 12) + "...", bridgeNodeId);
-                return IngestResult.duplicate(packetHash);
+                return duplicate(packetHash);
             }
 
             // ---- Decrypt ----
@@ -54,7 +54,7 @@ public class BridgeIngestionService {
             } catch (Exception e) {
                 log.warn("Decryption failed for packet {}: {}",
                         packetHash.substring(0, 12) + "...", e.getMessage());
-                return IngestResult.invalid(packetHash, "decryption_failed");
+                return invalid(packetHash, "decryption_failed");
             }
 
             // ---- Freshness check (replay protection) ----
@@ -62,31 +62,33 @@ public class BridgeIngestionService {
             if (ageSeconds > maxAgeSeconds) {
                 log.warn("Packet {} too old ({}s), rejected",
                         packetHash.substring(0, 12) + "...", ageSeconds);
-                return IngestResult.invalid(packetHash, "stale_packet");
+                return invalid(packetHash, "stale_packet");
             }
             if (ageSeconds < -300) { // small clock-skew tolerance
-                return IngestResult.invalid(packetHash, "future_dated");
+                return invalid(packetHash, "future_dated");
             }
 
             // ---- Settle ----
             Transaction tx = settlement.settle(instruction, packetHash, bridgeNodeId, hopCount);
-            return IngestResult.settled(packetHash, tx);
+            return settled(packetHash, tx);
 
         } catch (Exception e) {
             log.error("Ingestion error: {}", e.getMessage(), e);
-            return IngestResult.invalid("?", "internal_error: " + e.getMessage());
+            return invalid("?", "internal_error: " + e.getMessage());
         }
     }
 
-    public record IngestResult(String outcome, String packetHash, String reason, Long transactionId) {
-        public static IngestResult settled(String hash, Transaction tx) {
-            return new IngestResult("SETTLED", hash, null, tx.getId());
-        }
-        public static IngestResult duplicate(String hash) {
-            return new IngestResult("DUPLICATE_DROPPED", hash, null, null);
-        }
-        public static IngestResult invalid(String hash, String reason) {
-            return new IngestResult("INVALID", hash, reason, null);
-        }
+    public record IngestResult(String outcome, String packetHash, String reason, Long transactionId) { }
+
+    public static IngestResult settled(String hash, Transaction tx) {
+        return new IngestResult("SETTLED", hash, null, tx.getId());
+    }
+
+    public static IngestResult duplicate(String hash) {
+        return new IngestResult("DUPLICATE_DROPPED", hash, null, null);
+    }
+
+    public static IngestResult invalid(String hash, String reason) {
+        return new IngestResult("INVALID", hash, reason, null);
     }
 }

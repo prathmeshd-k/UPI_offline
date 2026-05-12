@@ -1,0 +1,19 @@
+# Docker build context exclusions
+target/
+.git
+.gitignore
+README.md
+*.md
+*.jar
+*.log
+.mvn
+.vscode
+.idea
+*.iml
+.DS_Store
+node_modules
+docker-compose.yml
+Dockerfile
+.dockerignore
+.env
+.env.example
