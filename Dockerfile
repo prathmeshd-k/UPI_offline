@@ -37,12 +37,12 @@ USER appuser
 # Expose port (default 8080, but can be overridden)
 EXPOSE 8080
 
-# Set Spring profile to docker (uses application-docker.properties)
-ENV SPRING_PROFILES_ACTIVE=docker
+# Optional: Set Spring profile. Defaults to default (H2 db). Set to 'docker' to use postgres.
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
 
-# Health check
+# Health check (uses PORT env var which is standard in cloud providers)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
 
-# Run the application with docker profile
-ENTRYPOINT ["java", "-Dspring.profiles.active=docker", "-jar", "app.jar"]
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
