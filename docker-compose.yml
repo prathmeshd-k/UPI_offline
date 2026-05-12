@@ -37,7 +37,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-SecurePassword123!}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL95Dialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       
       # Server configuration
       SERVER_PORT: 8080
@@ -50,7 +50,7 @@ services:
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_DEMO_UPIMESH: DEBUG
     ports:
-      - "8080:8080"
+      - "8090:8080"
     networks:
       - upi-mesh-network
     restart: unless-stopped
