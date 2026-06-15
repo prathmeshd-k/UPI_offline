@@ -1,31 +1,25 @@
-package com.demo.upimesh.model;
+package com.demo.upimesh.model; 
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Min;
-
+import jakarta.validation.constraints.NotBlank;   // Used to validate incoming requests.
+import jakarta.validation.constraints.NotNull;   //Used to validate incoming requests.
+import jakarta.validation.constraints.Min;      // Used to validate incoming requests.
+ 
 /**
- * The over-the-wire format. This is what hops from phone to phone via Bluetooth.
- *
- * The intermediate phones can read the OUTER fields (packetId, ttl, createdAt)
- * because they need them for routing and dedup. They CANNOT read `ciphertext` —
- * that's encrypted with the server's public key.
- *
- * NOTE on outer-field tampering:
- *   A malicious intermediate could change `packetId` or `createdAt`. That's why
- *   we use the ciphertext's hash (not packetId) as the idempotency key on the
- *   server. The ciphertext is authenticated by hybrid encryption, so any
- *   tampering inside the encrypted blob is detected on decryption.
+ it represents the actual packet that travels through the mesh network (Bluetooth)
+MeshPacket is the transport container used for forwarding payment requests through the mesh.
+
+             joo bluetooth user hai usko  - they cant see ->  {sender ,receiver , amount , upiId} 
+             it olly sees  { packetID , ttl , createdAt }   
  */
 public class MeshPacket {
 
-    @NotBlank
+    @NotBlank  // it rejects {"" , "  ", null}
     private String packetId; // UUID, used by intermediates for gossip dedup
 
-    @Min(0)
+    @Min(0) // Checks minimum numeric value.
     private int ttl; // Hops remaining; intermediates decrement it
 
-    @NotNull
+    @NotNull  // rejects null
     private Long createdAt; // epoch millis, when sender created the packet
 
     @NotBlank

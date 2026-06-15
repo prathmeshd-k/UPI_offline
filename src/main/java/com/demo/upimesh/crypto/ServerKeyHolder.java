@@ -30,9 +30,13 @@ public class ServerKeyHolder {
 
     @PostConstruct
     public void init() throws Exception {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-        gen.initialize(2048);
-        this.keyPair = gen.generateKeyPair();
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA"); //creates an RSA machine.
+       
+        gen.initialize(2048);  //Generate 2048-bit keys
+       
+        this.keyPair = gen.generateKeyPair(); //actually creates: Public Key, private KEy
+       
+       
         log.info("Server RSA keypair generated (2048-bit). Public key fingerprint: {}",
                 getPublicKeyBase64().substring(0, 32) + "...");
     }

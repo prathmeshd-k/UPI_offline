@@ -1,16 +1,36 @@
-package com.demo.upimesh.model;
+package com.demo.upimesh.model;  //Places entity in model package
 
-import jakarta.persistence.*;
+import jakarta.persistence.*;    //Provides JPA annotations.
 
-import java.math.BigDecimal;
-import java.time.Instant;
+import java.math.BigDecimal;  //Used for money values.
+import java.time.Instant;      // Represents timestamp in UTC.
 
 /**
- * Permanent record of every settled transaction. Once written, never modified.
- * The packetHash is the idempotency key — uniqueness is enforced at the DB level
- * as a defense-in-depth fallback if the Redis-style cache layer ever fails.
+ This is the final ledger record of your UPI Offline Mesh system.
+
+After a packet successfully reaches the backend and is processed,
+    a Transaction record is created and stored permanently in the database.
+
+Example record:
+
+ID: 101
+Sender: alice@upi
+Receiver: bob@upi
+Amount: ₹100
+SignedAt: 10:00 AM
+SettledAt: 10:05 AM
+HopCount: 4
+BridgeNode: NODE-7
+Status: SETTLED
+
+
+
+It stores every settled or rejected payment, enforces idempotency through a unique packet hash,
+ and captures settlement metadata such as hop count, bridge node, signing time, 
+ and settlement status for auditing and analytics.
+
  */
-@Entity
+@Entity   //marks this class as a DB entity
 @Table(name = "transactions",
         indexes = { @Index(name = "idx_packet_hash", columnList = "packetHash", unique = true) })
 public class Transaction {

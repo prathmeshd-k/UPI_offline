@@ -9,22 +9,26 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory idempotency cache. In production this would be Redis with SETNX +
- * TTL — exactly the same semantics, just distributed across instances.
- *
- * The contract:
- *   - claim(hash) returns true on first call, false on every call after that
- *     (within the TTL window)
- *   - the operation is atomic — even if 100 threads call claim(hash) at the
- *     same instant, exactly one returns true
- *
- * This is what kills the "three bridges deliver simultaneously" problem.
- * ConcurrentHashMap.putIfAbsent is the JVM-local equivalent of Redis SETNX.
+This service prevents the same payment packet from being processed multiple times.
+In payment systems, duplicate processing is one of the most dangerous problems.
+
+
  */
 @Service
 public class IdempotencyService {
 
     private final Map<String, Instant> seen = new ConcurrentHashMap<>();
+/*Stores:
+
+Packet Hash → First Seen Time
+
+Example:
+
+3f8a9e5c...
+    ↓
+2026-06-16T10:15:00
+ */
+
 
     @Value("${upi.mesh.idempotency-ttl-seconds:86400}")
     private long ttlSeconds;
@@ -34,8 +38,8 @@ public class IdempotencyService {
      * someone else already claimed it (i.e. the packet is a duplicate).
      */
     public boolean claim(String packetHash) {
-        Instant now = Instant.now();
-        Instant prev = seen.putIfAbsent(packetHash, now);
+        Instant now = Instant.now(); //Stores current timestamp.
+        Instant prev = seen.putIfAbsent(packetHash, now); //This is the heart of the service.
         return prev == null;
     }
 
@@ -55,3 +59,10 @@ public class IdempotencyService {
         seen.clear();
     }
 }
+
+/*idempotency layer to prevent duplicate settlement of offline mesh payment packets. 
+The service uses atomic ConcurrentHashMap.putIfAbsent() semantics to guarantee that only 
+the first arrival of a packet hash is processed, while duplicates are rejected. 
+A scheduled TTL-based eviction mechanism prevents unbounded memory growth. 
+In production, the same design can be implemented using Redis SETNX with expiration. 
+*/

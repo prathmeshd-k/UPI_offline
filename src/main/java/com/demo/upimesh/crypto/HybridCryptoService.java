@@ -41,16 +41,16 @@ public class HybridCryptoService {
 
     private static final String RSA_TRANSFORMATION = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
     private static final String AES_TRANSFORMATION = "AES/GCM/NoPadding";
-    private static final int AES_KEY_BITS = 256;
-    private static final int GCM_IV_BYTES = 12;
-    private static final int GCM_TAG_BITS = 128;
-    private static final int RSA_ENCRYPTED_KEY_BYTES = 256; // for 2048-bit RSA
+    private static final int AES_KEY_BITS = 256; // 256-bit AES
+    private static final int GCM_IV_BYTES = 12; // Prevents same data from producing same ciphertext.
+    private static final int GCM_TAG_BITS = 128; //Used to detect tampering.
+    private static final int RSA_ENCRYPTED_KEY_BYTES = 256; //2048 / 8 = 256 bytes
 
     private final SecureRandom rng = new SecureRandom();
     private final ObjectMapper json = new ObjectMapper();
 
     @Autowired
-    private ServerKeyHolder serverKey;
+    private ServerKeyHolder serverKey;//This class stores: RSA Public Key RSA Private Key
 
     /**
      * Encrypt a payment instruction with the server's public key.
@@ -62,7 +62,7 @@ public class HybridCryptoService {
         // 1. Generate a one-time AES key for this packet.
         KeyGenerator kg = KeyGenerator.getInstance("AES");
         kg.init(AES_KEY_BITS);
-        SecretKey aesKey = kg.generateKey();
+        SecretKey aesKey = kg.generateKey(); // X7A9B2C4...
 
         // 2. AES-GCM encrypt the payload.
         byte[] iv = new byte[GCM_IV_BYTES];
@@ -93,10 +93,10 @@ public class HybridCryptoService {
      * truncated input — this throws.
      */
     public PaymentInstruction decrypt(String base64Ciphertext) throws Exception {
-        byte[] all = Base64.getDecoder().decode(base64Ciphertext);
+        byte[] all = Base64.getDecoder().decode(base64Ciphertext); //Now we get raw bytes
 
         if (all.length < RSA_ENCRYPTED_KEY_BYTES + GCM_IV_BYTES + GCM_TAG_BITS / 8) {
-            throw new IllegalArgumentException("Ciphertext too short");
+            throw new IllegalArgumentException("Ciphertext too short"); //if(all.length < ...)
         }
 
         // Unpack

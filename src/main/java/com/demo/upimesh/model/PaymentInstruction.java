@@ -3,25 +3,28 @@ package com.demo.upimesh.model;
 import java.math.BigDecimal;
 
 /**
- * The actual payment instruction. After the server decrypts MeshPacket.ciphertext,
- * it gets one of these.
- *
- * Critical fields for security:
- *   - nonce: a UUID unique to this payment. Even if everything else were identical
- *            for two legitimate payments (alice sends bob ₹100 twice), the nonces
- *            differ, so the resulting ciphertexts and their hashes also differ.
- *   - signedAt: lets the server reject stale packets ("freshness window"). Without
- *               this, an attacker who got the ciphertext could replay it weeks later.
- *   - pinHash: in a real system the user enters a UPI PIN; we'd verify it against
- *              a hash held by the bank. Here we just record it for realism.
+ This class represents the actual UPI payment request.
+ Think of it as the real transaction data that is hidden inside the encrypted ciphertext of MeshPacket.
+ 
+
+
+ PaymentInstruction is the secure business payload of the UPI Offline Mesh system.
+ It contains sender and receiver VPAs, amount, PIN hash, nonce, and timestamp information, 
+ which are encrypted and transported inside a MeshPacket before
+  being validated and processed by the server."
+
+
+  
  */
 public class PaymentInstruction {
+//PaymentInstruction contains the actual payment details that the bank/server needs to execute a transaction.
+    
 
-    private String senderVpa;
-    private String receiverVpa;
-    private BigDecimal amount;
-    private String pinHash;
-    private String nonce;     // UUID, unique per payment intent
+    private String senderVpa; //"alice@upi"
+    private String receiverVpa; //"bob@upi"
+    private BigDecimal amount;  // 100
+    private String pinHash;      // "hashedPin"
+    private String nonce;     // UUID, unique per payment intent ex 123, 556 etc
     private Long signedAt;    // epoch millis, when sender signed
 
     public PaymentInstruction() {}

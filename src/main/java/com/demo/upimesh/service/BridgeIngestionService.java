@@ -13,16 +13,15 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 /**
- * Orchestrates the full server-side pipeline for one inbound packet from a
- * bridge node:
- *
- *   1. Hash the ciphertext.
- *   2. Try to claim that hash via the idempotency cache.
- *      - If already claimed: this is a duplicate. Drop it.
- *   3. Decrypt the ciphertext with the server's private key.
- *      - If decryption fails: tampered or junk. Reject.
- *   4. Check freshness — reject if signedAt is too old (replay protection).
- *   5. Hand off to SettlementService for the actual debit/credit.
+   I implemented the BridgeIngestionService, which acts as the secure entry point for offline mesh payments. 
+   It performs packet hashing, idempotency checks, hybrid decryption, replay protection
+ using timestamp validation, and then routes valid transactions to the settlement engine. 
+ This prevents duplicate settlements, replay attacks, and tampered packet processing.
+ 
+ Without this service: Duplicate Attack
+   Same packet sent 100 times.
+
+
  */
 @Service
 public class BridgeIngestionService {
