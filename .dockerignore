@@ -6,7 +6,6 @@ README.md
 *.md
 *.jar
 *.log
-.mvn
 .vscode
 .idea
 *.iml
