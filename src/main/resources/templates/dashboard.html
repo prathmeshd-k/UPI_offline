@@ -1,652 +1,429 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>UPI Offline Mesh — Dune Interface</title>
-    <!-- Modern Premium Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Offline Mesh Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #120e0c;
-            --surface-color: rgba(29, 23, 20, 0.85);
-            --border-color: rgba(212, 163, 115, 0.18);
-            --border-hover: rgba(231, 111, 81, 0.4);
-            --accent-gold: #e6c280;
-            --accent-terracotta: #e76f51;
-            --accent-clay: #f4a261;
-            --text-primary: #f5ebe6;
-            --text-secondary: #b5a499;
-            --glow-green: rgba(82, 183, 136, 0.25);
-            --glow-red: rgba(231, 111, 81, 0.25);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at 50% 0%, #1c1511 0%, var(--bg-color) 70%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 40px 24px;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f0a07;
+            color: #e5e7eb;
         }
 
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 48px;
-            position: relative;
+        .panel-card {
+            background-color: #17110d;
+            border: 1px solid #291e17;
+            border-radius: 1rem;
         }
 
-        header::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-terracotta), var(--accent-gold));
-            margin: 16px auto 0;
-            border-radius: 2px;
+        .custom-input {
+            background-color: #100b08;
+            border: 1px solid #38281e;
+            color: #f3f4f6;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #ffffff 40%, var(--accent-gold) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin-top: 8px;
-            font-weight: 300;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Dashboard Layout Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        @media (min-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1.2fr 0.8fr;
-            }
-        }
-
-        /* Glassmorphism Card style */
-        .card {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(12px);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: rgba(212, 163, 115, 0.3);
-        }
-
-        h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-primary);
-            border-bottom: 1px solid rgba(212, 163, 115, 0.1);
-            padding-bottom: 12px;
-        }
-
-        /* Timeline / Control flow style */
-        .controls-flow {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .step-block {
-            display: flex;
-            gap: 16px;
-            position: relative;
-        }
-
-        .step-block:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            left: 18px;
-            top: 40px;
-            bottom: -20px;
-            width: 2px;
-            background: rgba(212, 163, 115, 0.15);
-        }
-
-        .step-badge {
-            flex-shrink: 0;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--surface-color), #231a15);
-            border: 1.5px solid var(--accent-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--accent-gold);
-            box-shadow: 0 0 10px rgba(230, 194, 128, 0.2);
-        }
-
-        .step-content {
-            flex-grow: 1;
-            padding-top: 4px;
-        }
-
-        .step-title {
-            font-weight: 600;
-            font-size: 1.05rem;
-            margin-bottom: 10px;
-            color: var(--text-primary);
-        }
-
-        .input-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            background: rgba(18, 14, 12, 0.4);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(212, 163, 115, 0.1);
-        }
-
-        /* Styled inputs */
-        select, input {
-            background: #191412;
-            color: var(--text-primary);
-            border: 1px solid rgba(212, 163, 115, 0.25);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.95rem;
+        .custom-input:focus {
             outline: none;
-            transition: all 0.3s ease;
-        }
-
-        select:focus, input:focus {
-            border-color: var(--accent-clay);
-            box-shadow: 0 0 8px rgba(244, 162, 97, 0.2);
-        }
-
-        /* Buttons with warm sand gradient */
-        button {
-            background: linear-gradient(135deg, var(--accent-terracotta), var(--accent-clay));
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(231, 111, 81, 0.3);
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(231, 111, 81, 0.45);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        button.secondary {
-            background: linear-gradient(135deg, #2d2420, #3e322c);
-            color: var(--accent-gold);
-            border: 1px solid var(--border-color);
-            box-shadow: none;
-        }
-
-        button.secondary:hover {
-            border-color: var(--accent-gold);
-            box-shadow: 0 4px 12px rgba(230, 194, 128, 0.15);
-        }
-
-        button.danger {
-            background: transparent;
-            color: #f85149;
-            border: 1.5px solid rgba(248, 81, 73, 0.4);
-            box-shadow: none;
-        }
-
-        button.danger:hover {
-            background: rgba(248, 81, 73, 0.1);
-            border-color: #f85149;
-            box-shadow: 0 4px 12px rgba(248, 81, 73, 0.2);
-        }
-
-        /* Devices view layout */
-        .devices-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .device {
-            background: rgba(18, 14, 12, 0.5);
-            border: 1px solid rgba(212, 163, 115, 0.15);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .device.bridge {
-            border-left: 4px solid #52b788;
-            box-shadow: inset 0 0 10px var(--glow-green);
-        }
-
-        .device.offline {
-            border-left: 4px solid var(--accent-terracotta);
-            box-shadow: inset 0 0 10px var(--glow-red);
-        }
-
-        .device-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .device-id {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: var(--text-primary);
-        }
-
-        /* Styled badges */
-        .status-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .status-badge.online {
-            background: rgba(82, 183, 136, 0.15);
-            color: #52b788;
-            border: 1px solid rgba(82, 183, 136, 0.3);
-        }
-
-        .status-badge.offline {
-            background: rgba(231, 111, 81, 0.15);
-            color: #e76f51;
-            border: 1px solid rgba(231, 111, 81, 0.3);
-        }
-
-        .packet-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .packet-pill {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
-            background: #28211d;
-            border: 1px solid rgba(230, 194, 128, 0.25);
-            color: var(--accent-gold);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        /* Tables style */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-            margin-top: 8px;
-        }
-
-        th {
-            text-align: left;
-            padding: 12px 16px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            border-bottom: 1px solid rgba(212, 163, 115, 0.15);
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(212, 163, 115, 0.08);
-            color: var(--text-primary);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .balance-value {
-            font-family: 'Space Mono', monospace;
-            color: #52b788;
-            font-weight: 600;
-        }
-
-        /* Transaction status colors */
-        .tx-status {
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .tx-status-SETTLED { color: #52b788; }
-        .tx-status-REJECTED { color: #e76f51; }
-        .tx-status-DUPLICATE_DROPPED { color: #f4a261; }
-        .tx-status-INVALID { color: #e76f51; }
-
-        /* Console log component */
-        .console-container {
-            margin-top: 24px;
-        }
-
-        .console-log {
-            background: #0d0a08;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85rem;
-            color: #dfd0c5;
-            max-height: 250px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
-        }
-
-        /* Subtle pulsing animations */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(82, 183, 136, 0.4); }
-            70% { box-shadow: 0 0 0 6px rgba(82, 183, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(82, 183, 136, 0); }
-        }
-
-        .bridge-active-pulse {
-            animation: pulse 2s infinite;
+            border-color: #ea580c;
         }
     </style>
 </head>
-<body>
-<div class="container">
-    <header>
-        <h1>📡 UPI Offline Mesh</h1>
-        <p class="subtitle">
-            Secure offline payment mesh network. Encrypted transaction packets hop between peer devices via Bluetooth/Wi-Fi mesh and settle automatically once a bridge node establishes internet connectivity.
-        </p>
-    </header>
 
-    <div class="dashboard-grid">
-        <!-- Controls Left Column -->
-        <div class="card">
-            <h2>🎬 Mesh Operations Pipeline</h2>
-            
-            <div class="controls-flow">
+<body class="p-6 md:p-12 min-h-screen">
+    <div class="max-w-6xl mx-auto space-y-8">
+
+        <!-- Header -->
+        <header class="text-center space-y-3">
+            <div class="inline-flex items-center justify-center gap-2">
+                <span class="text-2xl">📡</span>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-amber-100 tracking-tight">UPI Offline <span
+                        class="text-orange-400">Mesh</span></h1>
+            </div>
+            <p class="text-sm md:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                Secure offline payment mesh network. Encrypted transaction packets hop between peer devices via
+                Bluetooth/Wi-Fi mesh and settle automatically once a bridge node establishes internet connectivity.
+            </p>
+            <div class="w-16 h-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full mx-auto mt-2"></div>
+        </header>
+
+        <!-- Top Section: Operations & Balances Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Mesh Operations Pipeline -->
+            <section class="lg:col-span-7 panel-card p-6 space-y-6">
+                <h2 class="text-lg font-bold text-zinc-100 flex items-center gap-2">
+                    <span>🎬</span> Mesh Operations Pipeline
+                </h2>
+
                 <!-- Step 1 -->
-                <div class="step-block">
-                    <div class="step-badge">1</div>
-                    <div class="step-content">
-                        <div class="step-title">Initialize Offline Transaction Packet</div>
-                        <div class="input-group">
-                            <select id="senderVpa">
-                                <option>rama@demo</option>
-                                <option>dk@demo</option>
-                                <option>prince@demo</option>
-                                <option>dev@demo</option>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-7 h-7 rounded-full border border-amber-600/50 text-amber-500 flex items-center justify-center text-xs font-bold">1</span>
+                        <h3 class="font-semibold text-zinc-200 text-sm">Initialize Offline Transaction Packet</h3>
+                    </div>
+                    <div class="pl-10 space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="sender-select"
+                                class="custom-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-orange-500">
+                                <option value="rama@demo">rama@demo</option>
+                                <option value="dk@demo">dk@demo</option>
+                                <option value="prince@demo">prince@demo</option>
+                                <option value="dev@demo">dev@demo</option>
                             </select>
-                            <span style="color: var(--text-secondary);">→</span>
-                            <select id="receiverVpa">
-                                <option>rama@demo</option>
-                                <option>dk@demo</option>
-                                <option>prince@demo</option>
-                                <option>dev@demo</option>
+                            <span class="text-zinc-500 font-bold">→</span>
+                            <select id="receiver-select"
+                                class="custom-input rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-orange-500">
+                                <option value="dk@demo">dk@demo</option>
+                                <option value="rama@demo">rama@demo</option>
+                                <option value="prince@demo">prince@demo</option>
+                                <option value="dev@demo">dev@demo</option>
                             </select>
-                            <input type="number" id="amount" value="500" style="width: 100px;">
-                            <input type="password" id="pin" value="1234" style="width: 80px;" maxlength="4" placeholder="PIN">
-                            <button onclick="sendPacket()">📤 Inject into Mesh</button>
+                            <input id="tx-amount" type="number" value="500"
+                                class="custom-input w-24 rounded-lg px-3 py-2 text-sm" placeholder="Amount" />
+                            <input id="tx-pin" type="password" value="1234" maxlength="4"
+                                class="custom-input w-16 rounded-lg px-3 py-2 text-center text-sm font-mono tracking-widest"
+                                placeholder="PIN" />
                         </div>
+                        <button onclick="injectPacket()"
+                            class="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-lg shadow-orange-950/40 transition">
+                            <span>👛</span> Inject into Mesh
+                        </button>
                     </div>
                 </div>
 
                 <!-- Step 2 -->
-                <div class="step-block">
-                    <div class="step-badge">2</div>
-                    <div class="step-content">
-                        <div class="step-title">Execute Peer-to-Peer Gossip Round</div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <button class="secondary" onclick="gossip()">🔄 Run Gossip Step</button>
-                            <span style="font-size: 0.85rem; color: var(--text-secondary);">Packets replicate across neighboring nodes</span>
-                        </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-7 h-7 rounded-full border border-amber-600/50 text-amber-500 flex items-center justify-center text-xs font-bold">2</span>
+                        <h3 class="font-semibold text-zinc-200 text-sm">Execute Peer-to-Peer Gossip Round</h3>
+                    </div>
+                    <div class="pl-10 flex flex-wrap items-center gap-3">
+                        <button onclick="runGossipStep()"
+                            class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium px-4 py-2 rounded-lg flex items-center gap-2 border border-zinc-700 transition">
+                            <span>🔄</span> Run Gossip Step
+                        </button>
+                        <span class="text-xs text-zinc-400">Packets replicate across neighboring nodes</span>
                     </div>
                 </div>
 
                 <!-- Step 3 -->
-                <div class="step-block">
-                    <div class="step-badge">3</div>
-                    <div class="step-content">
-                        <div class="step-title">Bridge Connection & Backend Settlement</div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <button class="secondary" onclick="flushBridges()">📡 Flush Bridge Packets</button>
-                            <span style="font-size: 0.85rem; color: var(--text-secondary);">Simulates bridge node hitting 4G/internet</span>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-7 h-7 rounded-full border border-amber-600/50 text-amber-500 flex items-center justify-center text-xs font-bold">3</span>
+                        <h3 class="font-semibold text-zinc-200 text-sm">Bridge Connection & Backend Settlement</h3>
+                    </div>
+                    <div class="pl-10 flex flex-wrap items-center gap-3">
+                        <button onclick="flushBridge()"
+                            class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium px-4 py-2 rounded-lg flex items-center gap-2 border border-zinc-700 transition">
+                            <span>📡</span> Flush Bridge Packets
+                        </button>
+                        <span class="text-xs text-zinc-400">Simulates bridge node hitting 4G/internet</span>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="resetMesh()"
+                        class="border border-red-900/50 hover:bg-red-950/30 text-red-400 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                        <span>🗑️</span> Reset Mesh & Cache
+                    </button>
+                </div>
+            </section>
+
+            <!-- Ledger Account Balances -->
+            <section class="lg:col-span-5 panel-card p-6 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-zinc-100 flex items-center gap-2 mb-4">
+                        <span>🏛️</span> Ledger Account Balances
+                    </h2>
+                    <div class="w-full text-left text-xs">
+                        <div class="grid grid-cols-3 text-zinc-500 font-semibold border-b border-zinc-800 pb-2 mb-2">
+                            <span>VPA ADDRESS</span>
+                            <span>HOLDER NAME</span>
+                            <span class="text-right">BALANCE</span>
+                        </div>
+                        <div id="balances-container" class="space-y-3">
+                            <!-- Balances rendered via JS -->
                         </div>
                     </div>
                 </div>
-
-                <!-- System Reset -->
-                <div style="padding-top: 12px; border-top: 1px solid rgba(212, 163, 115, 0.1);">
-                    <button class="danger" onclick="resetMesh()">🗑 Reset Mesh & Cache</button>
+                <div class="text-right text-[11px] text-zinc-500 mt-4">
+                    Idempotency Cache Registry: <span id="idempotency-count" class="text-zinc-400 font-mono">0</span>
+                    records
                 </div>
+            </section>
+        </div>
+
+        <!-- Active Mesh Nodes & Inventory -->
+        <section class="panel-card p-6 space-y-4">
+            <h2 class="text-lg font-bold text-zinc-100 flex items-center gap-2">
+                <span>📱</span> Active Mesh Nodes & Inventory
+            </h2>
+            <div id="nodes-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Node cards injected via JS -->
             </div>
-        </div>
+        </section>
 
-        <!-- Accounts & Balances Right Column -->
-        <div class="card">
-            <h2>🏦 Ledger Account Balances</h2>
-            <table id="accounts-table">
-                <thead>
-                    <tr>
-                        <th>VPA Address</th>
-                        <th>Holder Name</th>
-                        <th>Balance</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div style="margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary); text-align: right;" id="cacheInfo"></div>
-        </div>
+        <!-- Core Transaction Ledger -->
+        <section class="panel-card p-6 space-y-4">
+            <h2 class="text-lg font-bold text-zinc-100 flex items-center gap-2">
+                <span>📜</span> Core Transaction Ledger
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-zinc-400">
+                    <thead class="text-[11px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800">
+                        <tr>
+                            <th class="py-2.5">TX ID</th>
+                            <th class="py-2.5">Sender VPA</th>
+                            <th class="py-2.5">Receiver VPA</th>
+                            <th class="py-2.5">Amount</th>
+                            <th class="py-2.5">Status</th>
+                            <th class="py-2.5">Bridge Node</th>
+                            <th class="py-2.5">Hops</th>
+                            <th class="py-2.5">Settle Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tx-table-body" class="divide-y divide-zinc-900 font-mono">
+                        <tr>
+                            <td colspan="8" class="text-center py-6 text-zinc-600 font-sans">No settled or tracked
+                                transactions in ledger</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Activity Log Terminal -->
+        <section class="panel-card p-6 space-y-3">
+            <h2 class="text-lg font-bold text-zinc-100 flex items-center gap-2">
+                <span>🪵</span> Activity Log Terminal
+            </h2>
+            <div id="terminal-logs"
+                class="bg-[#0b0806] border border-zinc-900 rounded-lg p-4 font-mono text-xs text-zinc-400 h-32 overflow-y-auto space-y-1">
+                <p class="text-zinc-600">// System initialized. Offline mesh standby mode.</p>
+            </div>
+        </section>
     </div>
 
-    <!-- Mesh Network Status & Devices -->
-    <div class="card" style="margin-bottom: 24px;">
-        <h2>📱 Active Mesh Nodes & Inventory</h2>
-        <div id="devices" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div>
-    </div>
+    <script>
+        // State
+        const accounts = {
+            'rama@demo': { name: 'rama', balance: 5000 },
+            'dk@demo': { name: 'dk', balance: 1000 },
+            'prince@demo': { name: 'prince', balance: 2500 },
+            'dev@demo': { name: 'dev', balance: 500 }
+        };
 
-    <!-- Settlement History Ledger -->
-    <div class="card" style="margin-bottom: 24px;">
-        <h2>📜 Core Transaction Ledger</h2>
-        <div style="overflow-x: auto;">
-            <table id="tx-table">
-                <thead>
-                    <tr>
-                        <th>Tx ID</th>
-                        <th>Sender VPA</th>
-                        <th>Receiver VPA</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Bridge Node</th>
-                        <th>Hops</th>
-                        <th>Settle Time</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
+        const nodes = [
+            { id: 'phone-bridge', type: 'bridge', label: '4G BRIDGE', badgeColor: 'border-emerald-500 text-emerald-400 bg-emerald-950/20', packets: [] },
+            { id: 'phone-alice', type: 'mesh', label: 'MESH NODE', badgeColor: 'border-red-500/50 text-red-400 bg-red-950/20', packets: [] },
+            { id: 'phone-stranger2', type: 'mesh', label: 'MESH NODE', badgeColor: 'border-red-500/50 text-red-400 bg-red-950/20', packets: [] },
+            { id: 'phone-stranger1', type: 'mesh', label: 'MESH NODE', badgeColor: 'border-red-500/50 text-red-400 bg-red-950/20', packets: [] },
+            { id: 'phone-stranger3', type: 'mesh', label: 'MESH NODE', badgeColor: 'border-red-500/50 text-red-400 bg-red-950/20', packets: [] }
+        ];
 
-    <!-- Activity Log Terminal -->
-    <div class="card console-container">
-        <h2>🪵 Activity Log Terminal</h2>
-        <div id="log" class="console-log"></div>
-    </div>
-</div>
+        let transactions = [];
+        let processedTxIds = new Set();
 
-<script>
-    function log(msg) {
-        const el = document.getElementById('log');
-        el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
-    }
-
-    async function refresh() {
-        try {
-            // Mesh state
-            const m = await fetch('/api/mesh/state').then(r => r.json());
-            const devicesDiv = document.getElementById('devices');
-            devicesDiv.innerHTML = m.devices.map(d => `
-                <div class="device ${d.hasInternet ? 'bridge' : 'offline'}">
-                    <div class="device-header">
-                        <span class="device-id">📱 ${d.deviceId}</span>
-                        <span class="status-badge ${d.hasInternet ? 'online' : 'offline'}">
-                            ${d.hasInternet ? '🌐 4G Bridge' : '🚫 Mesh Node'}
-                        </span>
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
-                        Holding: <strong>${d.packetCount}</strong> transaction packet(s)
-                    </div>
-                    <div class="packet-pills">
-                        ${d.packetIds.map(id => `<span class="packet-pill">${id}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('cacheInfo').textContent =
-                `Idempotency Cache Registry: ${m.idempotencyCacheSize} records`;
-
-            // Accounts
-            const accs = await fetch('/api/accounts').then(r => r.json());
-            document.querySelector('#accounts-table tbody').innerHTML = accs.map(a => `
-                <tr>
-                    <td><strong>${a.vpa}</strong></td>
-                    <td style="color: var(--text-secondary);">${a.holderName}</td>
-                    <td class="balance-value">₹${parseFloat(a.balance).toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            // Transactions
-            const txs = await fetch('/api/transactions').then(r => r.json());
-            document.querySelector('#tx-table tbody').innerHTML = txs.map(t => `
-                <tr>
-                    <td><span style="font-family: 'Space Mono', monospace; font-size: 0.85rem;">#${t.id}</span></td>
-                    <td><strong>${t.senderVpa}</strong></td>
-                    <td><strong>${t.receiverVpa}</strong></td>
-                    <td class="balance-value">₹${parseFloat(t.amount).toFixed(2)}</td>
-                    <td class="tx-status tx-status-${t.status}">${t.status}</td>
-                    <td><span style="font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--text-secondary);">${t.bridgeNodeId}</span></td>
-                    <td style="text-align: center;">${t.hopCount}</td>
-                    <td style="color: var(--text-secondary); font-size: 0.85rem;">${new Date(t.settledAt).toLocaleTimeString()}</td>
-                </tr>
-            `).join('');
-        } catch (err) {
-            console.error("Error refreshing dashboard state:", err);
+        function log(msg, color = 'text-zinc-400') {
+            const terminal = document.getElementById('terminal-logs');
+            const p = document.createElement('p');
+            p.className = color;
+            p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
         }
-    }
 
-    async function sendPacket() {
-        try {
-            const body = {
-                senderVpa: document.getElementById('senderVpa').value,
-                receiverVpa: document.getElementById('receiverVpa').value,
-                amount: parseFloat(document.getElementById('amount').value),
-                pin: document.getElementById('pin').value,
-                ttl: 5,
-                startDevice: 'phone-alice'
-            };
-            const r = await fetch('/api/demo/send', {
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-            }).then(r => r.json());
-            log(`📤 Packet ${r.packetId.substring(0,8)} generated & injected at Alice's device (TTL ${r.ttl})`);
-            log(`   Ciphertext: ${r.ciphertextPreview}`);
-            refresh();
-        } catch (err) {
-            log(`❌ Error injecting transaction: ${err.message}`);
+        function renderBalances() {
+            const container = document.getElementById('balances-container');
+            container.innerHTML = '';
+            for (const [vpa, acc] of Object.entries(accounts)) {
+                container.innerHTML += `
+          <div class="grid grid-cols-3 items-center py-1">
+            <span class="font-bold text-zinc-100 font-mono">${vpa}</span>
+            <span class="text-zinc-400">${acc.name}</span>
+            <span class="text-right text-emerald-400 font-mono font-semibold">₹${acc.balance.toFixed(2)}</span>
+          </div>
+        `;
+            }
+            document.getElementById('idempotency-count').innerText = processedTxIds.size;
         }
-    }
 
-    async function gossip() {
-        try {
-            const r = await fetch('/api/mesh/gossip', {method: 'POST'}).then(r => r.json());
-            log(`🔄 Gossip cycle complete: ${r.transfers} packet transfer(s) across nodes — ${JSON.stringify(r.deviceCounts)}`);
-            refresh();
-        } catch (err) {
-            log(`❌ Gossip cycle failed: ${err.message}`);
-        }
-    }
-
-    async function flushBridges() {
-        try {
-            const r = await fetch('/api/mesh/flush', {method: 'POST'}).then(r => r.json());
-            log(`📡 Flush executed: ${r.uploadsAttempted} bridge upload(s) started.`);
-            r.results.forEach(res => {
-                log(`   → Node [${res.bridgeNode}] uploaded packet ${res.packetId}: outcome = [${res.outcome}]` +
-                    (res.reason ? ` (Reason: ${res.reason})` : ''));
+        function renderNodes() {
+            const container = document.getElementById('nodes-container');
+            container.innerHTML = '';
+            nodes.forEach(node => {
+                const isBridge = node.type === 'bridge';
+                const borderGlow = isBridge ? 'border-emerald-500/40 shadow-sm shadow-emerald-950' : 'border-zinc-800';
+                container.innerHTML += `
+          <div class="panel-card ${borderGlow} p-4 rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm text-zinc-100 flex items-center gap-1.5">
+                <span>📱</span> ${node.id}
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full border ${node.badgeColor} font-semibold">
+                ${node.label}
+              </span>
+            </div>
+            <p class="text-xs text-zinc-400">Holding: <strong class="text-zinc-200">${node.packets.length}</strong> transaction packet(s)</p>
+          </div>
+        `;
             });
-            refresh();
-        } catch (err) {
-            log(`❌ Flush execution failed: ${err.message}`);
         }
-    }
 
-    async function resetMesh() {
-        try {
-            await fetch('/api/mesh/reset', {method: 'POST'});
-            log('🗑 Mesh network inventory & backend idempotency cache cleared successfully.');
-            refresh();
-        } catch (err) {
-            log(`❌ Reset failed: ${err.message}`);
+        function renderLedger() {
+            const tbody = document.getElementById('tx-table-body');
+            if (transactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-zinc-600 font-sans">No settled or tracked transactions in ledger</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = transactions.map(tx => `
+        <tr class="hover:bg-zinc-900/50">
+          <td class="py-2.5 text-zinc-300 font-bold">${tx.id}</td>
+          <td class="py-2.5">${tx.sender}</td>
+          <td class="py-2.5">${tx.receiver}</td>
+          <td class="py-2.5 text-emerald-400">₹${tx.amount}</td>
+          <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] ${tx.status === 'SETTLED' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/50' : 'bg-amber-950/40 text-amber-400 border border-amber-800/50'}">${tx.status}</span></td>
+          <td class="py-2.5 text-zinc-400">${tx.bridgeNode || '-'}</td>
+          <td class="py-2.5 text-center">${tx.hops}</td>
+          <td class="py-2.5 text-zinc-500">${tx.settleTime || 'Pending'}</td>
+        </tr>
+      `).join('');
         }
-    }
 
-    // Initialize and start polling
-    refresh();
-    setInterval(refresh, 2500);
-</script>
+        function injectPacket() {
+            const sender = document.getElementById('sender-select').value;
+            const receiver = document.getElementById('receiver-select').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+
+            if (sender === receiver) {
+                log('Error: Sender and Receiver cannot be the same address.', 'text-red-400');
+                return;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                log('Error: Please enter a valid transaction amount.', 'text-red-400');
+                return;
+            }
+            if (accounts[sender].balance < amount) {
+                log(`Error: Insufficient balance in ${sender}.`, 'text-red-400');
+                return;
+            }
+
+            const txId = '0x' + Math.random().toString(16).substring(2, 8);
+            const packet = { id: txId, sender, receiver, amount, hops: 0, status: 'IN_MESH', bridgeNode: null, settleTime: null };
+
+            // Alice injects first
+            const aliceNode = nodes.find(n => n.id === 'phone-alice');
+            aliceNode.packets.push(packet);
+            transactions.unshift(packet);
+
+            log(`Packet [${txId}] generated by ${sender}. Signed offline & injected into phone-alice.`, 'text-amber-400');
+            renderNodes();
+            renderLedger();
+        }
+
+        function runGossipStep() {
+            let forwarded = false;
+            // Propagate packets linearly through strangers to bridge
+            for (let i = 1; i < nodes.length - 1; i++) {
+                if (nodes[i].packets.length > 0) {
+                    const targetNode = nodes[i + 1];
+                    nodes[i].packets.forEach(p => {
+                        if (!targetNode.packets.some(tp => tp.id === p.id)) {
+                            p.hops += 1;
+                            targetNode.packets.push(p);
+                            forwarded = true;
+                            log(`Gossip: Hop ${p.hops} → [${p.id}] forwarded from ${nodes[i].id} to ${targetNode.id}.`);
+                        }
+                    });
+                }
+            }
+
+            // Stranger3 forward to Bridge
+            const s3 = nodes.find(n => n.id === 'phone-stranger3');
+            const bridge = nodes.find(n => n.id === 'phone-bridge');
+            if (s3 && bridge && s3.packets.length > 0) {
+                s3.packets.forEach(p => {
+                    if (!bridge.packets.some(bp => bp.id === p.id)) {
+                        p.hops += 1;
+                        bridge.packets.push(p);
+                        forwarded = true;
+                        log(`Gossip: [${p.id}] reached 4G bridge node (${bridge.id}). Ready for settlement.`, 'text-emerald-300');
+                    }
+                });
+            }
+
+            if (!forwarded) {
+                log('Gossip step completed: No new packets to propagate.');
+            }
+            renderNodes();
+            renderLedger();
+        }
+
+        function flushBridge() {
+            const bridge = nodes.find(n => n.id === 'phone-bridge');
+            if (!bridge || bridge.packets.length === 0) {
+                log('No packets in Bridge buffer to settle.', 'text-zinc-500');
+                return;
+            }
+
+            bridge.packets.forEach(packet => {
+                if (!processedTxIds.has(packet.id)) {
+                    if (accounts[packet.sender].balance >= packet.amount) {
+                        accounts[packet.sender].balance -= packet.amount;
+                        accounts[packet.receiver].balance += packet.amount;
+                        processedTxIds.add(packet.id);
+
+                        packet.status = 'SETTLED';
+                        packet.bridgeNode = bridge.id;
+                        packet.settleTime = new Date().toLocaleTimeString();
+
+                        log(`Settled: [${packet.id}] executed via NPCI/Backend. ₹${packet.amount} transferred from ${packet.sender} to ${packet.receiver}.`, 'text-emerald-400');
+                    } else {
+                        packet.status = 'FAILED';
+                        log(`Failed: [${packet.id}] failed due to insufficient funds at settlement.`, 'text-red-400');
+                    }
+                }
+            });
+
+            bridge.packets = [];
+            renderBalances();
+            renderNodes();
+            renderLedger();
+        }
+
+        function resetMesh() {
+            nodes.forEach(n => n.packets = []);
+            transactions = [];
+            processedTxIds.clear();
+            accounts['rama@demo'].balance = 5000;
+            accounts['dk@demo'].balance = 1000;
+            accounts['prince@demo'].balance = 2500;
+            accounts['dev@demo'].balance = 500;
+
+            log('System reset. Memory cache, packets, and ledger purged.', 'text-red-400');
+            renderBalances();
+            renderNodes();
+            renderLedger();
+        }
+
+        // Initial Render
+        renderBalances();
+        renderNodes();
+        renderLedger();
+    </script>
 </body>
+
 </html>

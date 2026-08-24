@@ -14,7 +14,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U upiuser -d upimesh"]
+      test: [ "CMD-SHELL", "pg_isready -U upiuser -d upimesh" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,16 +36,15 @@ services:
       SPRING_DATASOURCE_USERNAME: upiuser
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-SecurePassword123!}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL95Dialect
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      
+
       # Server configuration
       SERVER_PORT: 8080
-      
+
       # Application settings
       UPI_MESH_IDEMPOTENCY_TTL_SECONDS: 86400
       UPI_MESH_PACKET_MAX_AGE_SECONDS: 86400
-      
+
       # Logging
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_DEMO_UPIMESH: DEBUG
@@ -55,7 +54,7 @@ services:
       - upi-mesh-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/accounts"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/accounts" ]
       interval: 30s
       timeout: 10s
       retries: 3
